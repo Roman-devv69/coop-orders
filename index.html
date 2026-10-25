@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ продуктов для кооператива</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+        .product-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; text-align: center; }
+        .product-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; }
+        .product-card h3 { font-size: 1rem; margin: 0.5rem 0; }
+        .qty-input { width: 60px; padding: 0.3rem; text-align: center; }
+        .form-section { margin-top: 2rem; padding: 1.5rem; border: 1px solid #eee; border-radius: 8px; }
+        .form-section label { display: block; margin-bottom: 0.5rem; }
+        .form-section input[type="text"] { width: 100%; padding: 0.5rem; margin-bottom: 1rem; box-sizing: border-box; }
+        #submit-btn { background-color: #2e7d32; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        #message { margin-top: 1rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Сбор заказов</h1>
+    <p>Укажите количество для нужных продуктов. Оставьте поле пустым, если товар не нужен.</p>
+
+    <div class="product-grid" id="product-grid">
+        <!-- Товары будут добавлены сюда через JavaScript -->
+    </div>
+
+    <div class="form-section">
+        <h2>Ваши данные</h2>
+        <label for="name">Ваше имя:</label>
+        <input type="text" id="name" required>
+
+        <label for="district">Район Москвы:</label>
+        <input type="text" id="district" required>
+
+        <button id="submit-btn">Отправить заказ</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // Список товаров (в реальности можно загружать из JSON или Google Таблицы)
+        const products = [
+            { id: 'coffee', name: 'Кофе молотый', img: 'https://via.placeholder.com/100?text=Coffee' },
+            { id: 'pasta', name: 'Макароны', img: 'https://via.placeholder.com/100?text=Pasta' },
+            { id: 'chicken', name: 'Куриная грудка', img: 'https://via.placeholder.com/100?text=Chicken' },
+            { id: 'rice', name: 'Рис', img: 'https://via.placeholder.com/100?text=Rice' },
+            { id: 'oil', name: 'Масло оливковое', img: 'https://via.placeholder.com/100?text=Oil' }
+        ];
+
+        const productGrid = document.getElementById('product-grid');
+
+        // Отрисовка карточек товаров
+        products.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${p.img}" alt="${p.name}">
+                <h3>${p.name}</h3>
+                <label for="qty-${p.id}">Кол-во:</label>
+                <input type="number" id="qty-${p.id}" class="qty-input" min="0" placeholder="0">
+            `;
+            productGrid.appendChild(card);
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            const name = document.getElementById('name').value.trim();
+            const district = document.getElementById('district').value.trim();
+            const messageEl = document.getElementById('message');
+
+            if (!name || !district) {
+                messageEl.textContent = 'Пожалуйста, заполните имя и район.';
+                messageEl.style.color = 'red';
+                return;
+            }
+
+            const order = {};
+            products.forEach(p => {
+                const qty = document.getElementById(`qty-${p.id}`).value;
+                if (qty && parseInt(qty) > 0) {
+                    order[p.name] = parseInt(qty);
+                }
+            });
+
+            if (Object.keys(order).length === 0) {
+                messageEl.textContent = 'Вы не выбрали ни одного товара.';
+                messageEl.style.color = 'red';
+                return;
+            }
+
+            const payload = { Name: name, District: district, Order: order };
+
+            messageEl.textContent = 'Отправка...';
+            messageEl.style.color = 'black';
+
+            try {
+                // ЗАМЕНИТЕ НА ВАШ URL ИЗ ШАГА 1
+                const response = await fetch('https://script.google.com/macros/s/AKfycbwH0bQGuSDV6W2tpbOP9WLq94h5TJhD-pURuf01qu3BV4qiLlR1Aplma_1HBxabGBXv/exec', {
+    			method: 'POST',
+    			redirect: 'follow',
+    			headers: {
+        				'Content-Type': 'text/plain;charset=utf-8' // <-- Ключевое изменение
+    			},
+    			body: JSON.stringify(payload)
+		});
+                const result = await response.json();
+                if (result.result === 'success') {
+                    messageEl.textContent = 'Спасибо! Ваш заказ принят.';
+                    messageEl.style.color = 'green';
+                    // Очистка полей после успешной отправки
+                    document.getElementById('name').value = '';
+                    document.getElementById('district').value = '';
+                    document.querySelectorAll('.qty-input').forEach(input => input.value = '');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                messageEl.textContent = 'Ошибка отправки: ' + error.message;
+                messageEl.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
