@@ -5,120 +5,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заказ продуктов для кооператива</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
-        .product-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; text-align: center; }
-        .product-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; }
-        .product-card h3 { font-size: 1rem; margin: 0.5rem 0; }
-        .qty-input { width: 60px; padding: 0.3rem; text-align: center; }
-        .form-section { margin-top: 2rem; padding: 1.5rem; border: 1px solid #eee; border-radius: 8px; }
-        .form-section label { display: block; margin-bottom: 0.5rem; }
-        .form-section input[type="text"] { width: 100%; padding: 0.5rem; margin-bottom: 1rem; box-sizing: border-box; }
-        #submit-btn { background-color: #2e7d32; color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        body { font-family: sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+        h1 { margin-bottom: 0.5rem; }
+        .subtitle { color: #555; margin-top: 0; }
+
+        /* Сетка товаров */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+        .category-title {
+            grid-column: 1 / -1;
+            font-size: 1.15rem;
+            color: #2e7d32;
+            border-bottom: 2px solid #2e7d32;
+            padding-bottom: 0.3rem;
+            margin: 1.5rem 0 0 0;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem 0.8rem;
+            text-align: center;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .product-card img {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #f0f0f0;
+        }
+        .product-card h3 {
+            font-size: 0.95rem;
+            margin: 0.6rem 0 0.2rem;
+            min-height: 2.4em;
+            line-height: 1.2;
+        }
+        .qty-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: auto;
+        }
+        .qty-input {
+            width: 70px;
+            padding: 0.4rem;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .unit-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Форма */
+        .form-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .form-section label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+        .form-section input[type="text"],
+        .form-section textarea {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .form-section textarea { resize: vertical; }
+        .hint { font-weight: normal; color: #777; font-size: 0.85rem; }
+        #submit-btn {
+            background-color: #2e7d32;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        #submit-btn:hover { background-color: #256428; }
+        #submit-btn:disabled { background-color: #999; cursor: not-allowed; }
         #message { margin-top: 1rem; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>Сбор заказов</h1>
-    <p>Укажите количество для нужных продуктов. Оставьте поле пустым, если товар не нужен.</p>
+    <p class="subtitle">Укажите количество для нужных продуктов. Оставьте поле пустым, если товар не нужен.</p>
 
-    <div class="product-grid" id="product-grid">
-        <!-- Товары будут добавлены сюда через JavaScript -->
-    </div>
+    <div class="product-grid" id="product-grid"></div>
 
     <div class="form-section">
         <h2>Ваши данные</h2>
         <label for="name">Ваше имя:</label>
-        <input type="text" id="name" required>
+        <input type="text" id="name" required placeholder="Например, Анна">
 
         <label for="district">Район Москвы:</label>
-        <input type="text" id="district" required>
+        <input type="text" id="district" required placeholder="Например, Хамовники">
+
+        <label for="special">
+            Специфические продукты
+            <span class="hint">(по желанию)</span>
+        </label>
+        <textarea id="special" rows="3" placeholder="Например: кофе Lavazza 1 кг, оливки без косточек 3 банки..."></textarea>
+
+        <label for="feedback">
+            Обратная связь
+            <span class="hint">(по желанию — что улучшить, что добавить, что неудобно - в общем, критика)</span>
+        </label>
+        <textarea id="feedback" rows="3" placeholder="Например: добавьте, пожалуйста, растительное молоко; неудобно, что нельзя выбрать приоритет товара..."></textarea>
 
         <button id="submit-btn">Отправить заказ</button>
         <div id="message"></div>
     </div>
 
     <script>
-        // Список товаров (в реальности можно загружать из JSON или Google Таблицы)
+        // ── Список товаров ─────────────────────────────────────────────
+	// Короткие имена для заголовков колонок в таблице.
+// Должны совпадать с заголовками в Google Таблице.
+const shortNames = {
+    makfa_spirali:      'Спирали Makfa',
+    shebekino_lingvini: 'Лингвини Шебекинские',
+    grechka_uvelka:     'Гречка Увелка',
+    hercules:           'Геркулес',
+    udon:               'Удон Imperial',
+    makfa_spagetti:     'Спагетти Makfa',
+    mistral_mannaya:    'Манка Мистраль',
+    chicken:            'Куриная грудка',
+    tushonka:           'Тушёнка ГОСТ',
+    golyashka:          'Голяшка говяжья',
+    sguschenka:         'Сгущёнка Верховский',
+    oleyna:             'Олейна',
+    borges:             'Borges',
+    pomidorka:          'Помидорка',
+    zheykey:            'Жокей',
+    greenfield:         'Greenfield',
+    hrutka:             'Хрутка',
+    cola:               'Coca-Cola',
+    walnuts:            'Грецкие орехи',
+    raisins:            'Изюм',
+    apricots:           'Курага',
+    snickers:           'Snickers',
+    twix:               'Twix',
+    kitkat:             'KitKat'
+};
         const products = [
-            { id: 'coffee', name: 'Кофе молотый', img: 'https://via.placeholder.com/100?text=Coffee' },
-            { id: 'pasta', name: 'Макароны', img: 'https://via.placeholder.com/100?text=Pasta' },
-            { id: 'chicken', name: 'Куриная грудка', img: 'https://via.placeholder.com/100?text=Chicken' },
-            { id: 'rice', name: 'Рис', img: 'https://via.placeholder.com/100?text=Rice' },
-            { id: 'oil', name: 'Масло оливковое', img: 'https://via.placeholder.com/100?text=Oil' }
+            // 🥣 Крупы и бакалея
+            { id: 'makfa_spirali',      name: 'Макароны Makfa Спирали 400 г (флоу-пак)',                       category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://www.ramen.ru/upload/webp/iblock/4d4/opp6um4ozf3vcwfarevncrb3nqkso1yx.webp' },
+            { id: 'shebekino_lingvini', name: 'Лапша Шебекинские №011 лингвини 450 г (флоу-пак)',              category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://megatitan.ru/upload/iblock/66a/ngqui84r73d2hn0abvzbgfrleiky8u7v.jpg' },
+            { id: 'grechka_uvelka',     name: 'Гречка Увелка Экстра 800 г (флоу-пак)',                          category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/get-mpic/11549745/2a000001920679becda723ffc7cffc27c63e/orig' },
+            { id: 'hercules',           name: 'Овсяные хлопья Геркулес Традиционные 500 г (картон)',                         category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=aabad2127de33cd74ea51e874138c510_l-5656601-images-thumbs&n=13' },
+            { id: 'udon',               name: 'Лапша Удон Imperial Cuisine 400 г (флоу-пак)',                   category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://tsx.x5static.net/i/800x800-fit/xdelivery/files/40/31/b6c8af694def71ce2d84e07b3042.jpg' },
+            { id: 'makfa_spagetti',     name: 'Спагетти Makfa группа А в/с 400 г (флоу-пак)',                   category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://vodovoz.ru/upload/iblock/177/177cfe467b7d07ebe93076c43f03c7cd.jpeg' },
+            { id: 'mistral_mannaya',    name: 'Манная крупа Мистраль 800 г (флоу-пак)',                         category: 'Крупы и бакалея', unit: 'упак', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/get-mpic/5323357/img_id5080433192688189623.jpeg/orig' },
+
+            // 🥫 Мясо и консервы
+            { id: 'chicken',            name: 'Куриная грудка (филе)',                                          category: 'Мясо и консервы', unit: 'кг',   step: 0.1, min: 0, img: 'https://avatars.mds.yandex.net/get-eda/15386914/429cae0db4e887656d54113d1b9e61a8/orig' },
+            { id: 'tushonka',           name: 'Тушёнка Говядина ГОСТ в/с 325 г',                                category: 'Мясо и консервы', unit: 'банка', step: 1,   min: 0, img: 'https://yandex-images.clstorage.net/47FcUD239/0ffb27yMm/1ISCUEL-ZQN1zCx3aLt1oxr8DHDVDzhIFGew9BwLJR8vcOWEzdoZqTeHsUQxT6CpCrdZbff7EXoydrDI978LbpDU1zQr1ngCPYV8OzTSBboGiG1I0VcINdCjICGo642Gv9gBGKTjZNx-v-xBAOpg4Z8igCBSapgG7uLpEQevB2bkhP-lq2Ixx008DF8JR9Fjm5BIMKETyHWcn3iZmIeNUlfo8TRIJxTQMp7sBYzSkd2_fpDEuop8smKqSR13yze6PPQXjZeSfQ_hPPSD4btp07cc1Oz5FyidmJvwfQTP7S7foBXs5IOMGKpy3CWAopF5Szb8ZJb2_Lr6YkHBuz-_MjBAlz0rnrl3Pfz8q4HHbb8DCDwo_YeAiUwH4OX0xxF6_yR1vKTzkKR-2rzJFCbN_T9CuDCG6nz66mIFxasvDxa4HP-Rm3rZe7EoHHuZHx37y3jMyCXb6PV8Y4RhALupLq945eggd9jY0sqwFXAqUTkbLnCUDi7kxrpK7R3vN4sWsMjbNedSTR8R-Hgz_VsF_48UeDxRGzQVHI-siTR3qaZbTJFIgEdgJO5yCFFcMgE1n6YgPH4aiLb6KkU5v88nNgwsw9FXBkFzvTR0442vAbdv5DQ4WSeInQQHtOHsQynSH8zpeAyHDPTCFuA9DELJ5esmqOB-Jnj-zlKBPfdrz35UaNvh9-Ylj70AOOMp183zd5yIeAnP7Hm4t5BtJAsdUtfYPaTQpzzQCvI0AcSKqd3nVvBkkgqQro5qwY3zJ6uiGFDnIT8mzfNRyByfneNx78OISNAxB0S9OHdonbSnjXK7DPH4RGtAhCbGaEGUCgWJ5zoIRI7-vL4WTikN4wOjMoiAl4GXlnmX5fyUO3lHVQMTeIhs_ZPgffhPGKmcjxESo_QV_NgjSGTOduANbDYVbcM2KJQW6nw65mb5bR9LY0bsJOdZx5JZG_00TPflhwEHX8wIsI2L8BF425gxDAMc' },
+            { id: 'golyashka',          name: 'Голяшка говяжья б/к',                                            category: 'Мясо и консервы', unit: 'кг',   step: 0.1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=e7ee604cb9620855b0bf00424f74fff0_l-4162404-images-thumbs&n=13' },
+            { id: 'sguschenka',         name: 'Сгущённое молоко Верховский МКЗ ГОСТ 8,5% 380 г ж/б',            category: 'Мясо и консервы', unit: 'банка', step: 1,   min: 0, img: 'https://basket-47.wbbasket.ru/vol14904/part1490472/1490472444/images/big/1.webp' },
+
+            // 🫒 Масла и соусы
+            { id: 'oleyna',             name: 'Масло подсолнечное Олейна 1 л',                                  category: 'Масла и соусы',   unit: 'бутылка', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=f5252e788078dee37e8773d8c6771046_l-4347438-images-thumbs&n=13' },
+            { id: 'borges',             name: 'Масло оливковое Borges Extra Virgin 1 л',                        category: 'Масла и соусы',   unit: 'бутылка', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/get-goods_pic/8173137/hat8e6dc0f4ba03fdc8074cba59a4aee1b9/orig' },
+            { id: 'pomidorka',          name: 'Томатная паста Помидорка 380 г',                                 category: 'Масла и соусы',   unit: 'банка',   step: 1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=8257ca08a02956c26df7636d28ac562a_l-12906151-images-thumbs&n=13' },
+
+            // ☕ Напитки
+            { id: 'zheykey',            name: 'Кофе молотый Жокей По-восточному 250 г',                         category: 'Напитки',         unit: 'упак',  step: 1, min: 0, img: 'https://ir.ozone.ru/s3/rp-photo-14/c1000/b6f0d7e1-0aa4-473a-8115-ecf08a7e61bb.jpeg' },
+            { id: 'greenfield',         name: 'Чай чёрный Greenfield Golden Ceylon 100 пак.',                   category: 'Напитки',         unit: 'упак',  step: 1, min: 0, img: 'https://avatars.mds.yandex.net/get-goods_pic/13799557/hat96672dd2efb9c18ed12e87efc5da812f/orig' },
+            { id: 'hrutka',             name: 'Какао-напиток Хрутка 480 г',                                     category: 'Напитки',         unit: 'упак',  step: 1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=72a43be5b5751d133c75220ab3042009_l-4012334-images-thumbs&n=13' },
+            { id: 'cola',               name: 'Coca-Cola ж/б 300 мл',                                           category: 'Напитки',         unit: 'банка', step: 1, min: 0, img: 'https://main-cdn.sbermegamarket.ru/big1/hlr-system/-15/404/316/314/718/20/100051115618b0.jpg' },
+
+            // 🥜 Орехи и сухофрукты
+            { id: 'walnuts',            name: 'Грецкие орехи',                                                  category: 'Орехи и сухофрукты', unit: 'кг', step: 0.1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=244340fb4ccd6c9de8b002dc9ce085fb_l-5707839-images-thumbs&n=13' },
+            { id: 'raisins',            name: 'Изюм',                                                           category: 'Орехи и сухофрукты', unit: 'кг', step: 0.1, min: 0, img: 'https://avatars.mds.yandex.net/get-mpic/12022975/2a00000191c7e0646a55d0952ed56289158d/orig' },
+            { id: 'apricots',           name: 'Курага',                                                         category: 'Орехи и сухофрукты', unit: 'кг', step: 0.1, min: 0, img: 'https://ir.ozone.ru/s3/multimedia-1-e/c1000/7947008870.jpg' },
+
+            // 🍫 Сладкое
+            { id: 'snickers',           name: 'Батончик Snickers 50,5 г',                                       category: 'Сладкое',         unit: 'шт', step: 1, min: 0, img: 'https://content.img-gorod.ru/pim/products/images/64/c9/018fd0bb-f996-77aa-af67-67274ff064c9.jpg' },
+            { id: 'twix',               name: 'Батончик Twix 55 г',                                             category: 'Сладкое',         unit: 'шт', step: 1, min: 0, img: 'https://media.komus.ru/medias/sys_master/product-images/product-images/h43/h18/13740209176606/409454-1-800Wx800H.jpg' },
+            { id: 'kitkat',             name: 'Батончик KitKat 38 г',                                           category: 'Сладкое',         unit: 'шт', step: 1, min: 0, img: 'https://avatars.mds.yandex.net/i?id=3b220697084524d5f20e30404856fc93_l-9107092-images-thumbs&n=13' }
         ];
 
         const productGrid = document.getElementById('product-grid');
 
-        // Отрисовка карточек товаров
+        // Отрисовка карточек, сгруппированных по категориям
+        let currentCategory = null;
         products.forEach(p => {
+            if (p.category !== currentCategory) {
+                currentCategory = p.category;
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.textContent = currentCategory;
+                productGrid.appendChild(title);
+            }
+
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
                 <img src="${p.img}" alt="${p.name}">
                 <h3>${p.name}</h3>
-                <label for="qty-${p.id}">Кол-во:</label>
-                <input type="number" id="qty-${p.id}" class="qty-input" min="0" placeholder="0">
+                <div class="qty-wrapper">
+                    <input type="number"
+                           id="qty-${p.id}"
+                           class="qty-input"
+                           min="${p.min}"
+                           step="${p.step}"
+                           placeholder="0">
+                    <span class="unit-label">${p.unit}</span>
+                </div>
             `;
             productGrid.appendChild(card);
         });
 
+        // Отправка формы
         document.getElementById('submit-btn').addEventListener('click', async () => {
-            const name = document.getElementById('name').value.trim();
-            const district = document.getElementById('district').value.trim();
-            const messageEl = document.getElementById('message');
+    const name = document.getElementById('name').value.trim();
+    const district = document.getElementById('district').value.trim();
+    const special = document.getElementById('special').value.trim();
+    const feedback = document.getElementById('feedback').value.trim();
+    const messageEl = document.getElementById('message');
+    const submitBtn = document.getElementById('submit-btn');
 
-            if (!name || !district) {
-                messageEl.textContent = 'Пожалуйста, заполните имя и район.';
-                messageEl.style.color = 'red';
-                return;
-            }
+    if (!name || !district) {
+        messageEl.textContent = 'Пожалуйста, заполните имя и район.';
+        messageEl.style.color = 'red';
+        return;
+    }
 
-            const order = {};
-            products.forEach(p => {
-                const qty = document.getElementById(`qty-${p.id}`).value;
-                if (qty && parseInt(qty) > 0) {
-                    order[p.name] = parseInt(qty);
-                }
-            });
+    // Формируем payload: для каждого товара — отдельный ключ,
+    // совпадающий с заголовком колонки в таблице.
+    const payload = {
+        Name: name,
+        District: district,
+        Special: special,
+        Feedback: feedback
+    };
 
-            if (Object.keys(order).length === 0) {
-                messageEl.textContent = 'Вы не выбрали ни одного товара.';
-                messageEl.style.color = 'red';
-                return;
-            }
+    products.forEach(p => {
+        const qty = document.getElementById(`qty-${p.id}`).value;
+        if (qty && parseFloat(qty) > 0) {
+            const header = `${shortNames[p.id]} (${p.unit})`;
+            payload[header] = parseFloat(qty);
+        }
+    });
 
-            const payload = { Name: name, District: district, Order: order };
+    // Хотя бы что-то должно быть заполнено
+    const hasProducts = products.some(p => {
+        const qty = document.getElementById(`qty-${p.id}`).value;
+        return qty && parseFloat(qty) > 0;
+    });
 
-            messageEl.textContent = 'Отправка...';
-            messageEl.style.color = 'black';
+    if (!hasProducts && !special && !feedback) {
+        messageEl.textContent = 'Вы не выбрали ни одного товара, не оставили пожеланий и отзывов.';
+        messageEl.style.color = 'red';
+        return;
+    }
 
-            try {
-                // ЗАМЕНИТЕ НА ВАШ URL ИЗ ШАГА 1
-                const response = await fetch('https://script.google.com/macros/s/AKfycbwH0bQGuSDV6W2tpbOP9WLq94h5TJhD-pURuf01qu3BV4qiLlR1Aplma_1HBxabGBXv/exec', {
-    			method: 'POST',
-    			redirect: 'follow',
-    			headers: {
-        				'Content-Type': 'text/plain;charset=utf-8' // <-- Ключевое изменение
-    			},
-    			body: JSON.stringify(payload)
-		});
-                const result = await response.json();
-                if (result.result === 'success') {
-                    messageEl.textContent = 'Спасибо! Ваш заказ принят.';
-                    messageEl.style.color = 'green';
-                    // Очистка полей после успешной отправки
-                    document.getElementById('name').value = '';
-                    document.getElementById('district').value = '';
-                    document.querySelectorAll('.qty-input').forEach(input => input.value = '');
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (error) {
-                messageEl.textContent = 'Ошибка отправки: ' + error.message;
-                messageEl.style.color = 'red';
-            }
+    messageEl.textContent = 'Отправка...';
+    messageEl.style.color = 'black';
+    submitBtn.disabled = true;
+
+    try {
+        await fetch('https://script.google.com/macros/s/AKfycbyJl357IChuaQsp7X2ogAs_Hn-3niRMlYlEjd_o3COfdpILtcHCx81XR9mi7ROF0LpX/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
         });
-    </script>
+
+        messageEl.textContent = 'Спасибо! Ваш заказ отправлен.';
+        messageEl.style.color = 'green';
+
+        document.getElementById('name').value = '';
+        document.getElementById('district').value = '';
+        document.getElementById('special').value = '';
+        document.getElementById('feedback').value = '';
+        document.querySelectorAll('.qty-input').forEach(input => input.value = '');
+
+    } catch (error) {
+        messageEl.textContent = 'Ошибка отправки: ' + error.message;
+        messageEl.style.color = 'red';
+    } finally {
+        submitBtn.disabled = false;
+    }
+});
+
+	</script>
 </body>
 </html>
